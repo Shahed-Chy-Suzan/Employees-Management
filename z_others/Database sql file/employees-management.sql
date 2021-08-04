@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 04, 2021 at 11:49 AM
+-- Generation Time: Aug 04, 2021 at 12:35 PM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.2
 
@@ -29,6 +29,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `cities` (
   `id` bigint(20) UNSIGNED NOT NULL,
+  `state_id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -41,6 +43,8 @@ CREATE TABLE `cities` (
 
 CREATE TABLE `countries` (
   `id` bigint(20) UNSIGNED NOT NULL,
+  `country_code` char(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -53,6 +57,7 @@ CREATE TABLE `countries` (
 
 CREATE TABLE `departments` (
   `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -65,6 +70,17 @@ CREATE TABLE `departments` (
 
 CREATE TABLE `employees` (
   `id` bigint(20) UNSIGNED NOT NULL,
+  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `middle_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `department_id` bigint(20) UNSIGNED NOT NULL,
+  `country_id` bigint(20) UNSIGNED NOT NULL,
+  `state_id` bigint(20) UNSIGNED NOT NULL,
+  `city_id` bigint(20) UNSIGNED NOT NULL,
+  `zip_code` char(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `birthdate` date DEFAULT NULL,
+  `date_hired` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -105,11 +121,11 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2014_10_12_000000_create_users_table', 1),
 (2, '2014_10_12_100000_create_password_resets_table', 1),
 (3, '2019_08_19_000000_create_failed_jobs_table', 1),
-(4, '2021_08_04_094301_create_employees_table', 1),
-(5, '2021_08_04_094320_create_countries_table', 1),
-(6, '2021_08_04_094330_create_states_table', 1),
-(7, '2021_08_04_094339_create_cities_table', 1),
-(8, '2021_08_04_094351_create_departments_table', 1);
+(4, '2021_08_04_094320_create_countries_table', 1),
+(5, '2021_08_04_094330_create_states_table', 1),
+(6, '2021_08_04_094339_create_cities_table', 1),
+(7, '2021_08_04_094351_create_departments_table', 1),
+(8, '2021_08_04_094361_create_employees_table', 1);
 
 -- --------------------------------------------------------
 
@@ -131,6 +147,8 @@ CREATE TABLE `password_resets` (
 
 CREATE TABLE `states` (
   `id` bigint(20) UNSIGNED NOT NULL,
+  `country_id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -143,7 +161,9 @@ CREATE TABLE `states` (
 
 CREATE TABLE `users` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -160,7 +180,8 @@ CREATE TABLE `users` (
 -- Indexes for table `cities`
 --
 ALTER TABLE `cities`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `cities_state_id_foreign` (`state_id`);
 
 --
 -- Indexes for table `countries`
@@ -178,7 +199,11 @@ ALTER TABLE `departments`
 -- Indexes for table `employees`
 --
 ALTER TABLE `employees`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `employees_department_id_foreign` (`department_id`),
+  ADD KEY `employees_country_id_foreign` (`country_id`),
+  ADD KEY `employees_state_id_foreign` (`state_id`),
+  ADD KEY `employees_city_id_foreign` (`city_id`);
 
 --
 -- Indexes for table `failed_jobs`
@@ -203,7 +228,8 @@ ALTER TABLE `password_resets`
 -- Indexes for table `states`
 --
 ALTER TABLE `states`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `states_country_id_foreign` (`country_id`);
 
 --
 -- Indexes for table `users`
@@ -263,6 +289,31 @@ ALTER TABLE `states`
 --
 ALTER TABLE `users`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `cities`
+--
+ALTER TABLE `cities`
+  ADD CONSTRAINT `cities_state_id_foreign` FOREIGN KEY (`state_id`) REFERENCES `states` (`id`);
+
+--
+-- Constraints for table `employees`
+--
+ALTER TABLE `employees`
+  ADD CONSTRAINT `employees_city_id_foreign` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`),
+  ADD CONSTRAINT `employees_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`),
+  ADD CONSTRAINT `employees_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`),
+  ADD CONSTRAINT `employees_state_id_foreign` FOREIGN KEY (`state_id`) REFERENCES `states` (`id`);
+
+--
+-- Constraints for table `states`
+--
+ALTER TABLE `states`
+  ADD CONSTRAINT `states_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
