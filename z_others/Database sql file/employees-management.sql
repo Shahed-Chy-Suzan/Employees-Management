@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 04, 2021 at 12:35 PM
+-- Generation Time: Aug 04, 2021 at 01:09 PM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.2
 
@@ -173,6 +173,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `last_name`, `first_name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Shahed Suzan', 'Suzan', 'Shahed', 'suzan@gmail.com', NULL, '$2y$10$ZN5AOlKX8p.FP6hg4RWtMekFQ2HWo6UXKK5zlZ89A72iMlsx0KePO', NULL, '2021-08-04 05:08:54', '2021-08-04 05:08:54');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -288,7 +295,7 @@ ALTER TABLE `states`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
