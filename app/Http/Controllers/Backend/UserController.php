@@ -41,6 +41,20 @@ class UserController extends Controller
           'password' => Hash::make($request->password),
         ]);
 
+        //-----or---------
+          // User::create($request->validated());
+
+        //-----or---------
+          // $request->validated();
+
+          // User::create([
+          //   'username' => $request->username,
+          //   'first_name' => $request->first_name,
+          //   'last_name' => $request->last_name,
+          //   'email' => $request->email,
+          //   'password' => Hash::make($request->password),
+          // ]);
+
         return redirect()->route('users.index')->with('message', 'User Register Succesfully');
     }
 
