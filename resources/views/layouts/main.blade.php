@@ -60,8 +60,8 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{{ route('countries.index') }}">Country</a>
                         <a class="collapse-item" href="{{ route('states.index') }}">State</a>
-                        {{-- <a class="collapse-item" href="{{ route('departments.index') }}">Department</a>
-                        <a class="collapse-item" href="{{ route('cities.index') }}">City</a> --}}
+                        <a class="collapse-item" href="{{ route('cities.index') }}">City</a>
+                        <a class="collapse-item" href="{{ route('departments.index') }}">Department</a>
                     </div>
                 </div>
             </li>
@@ -78,8 +78,8 @@
                 <div id="collapseUser" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{{ route('users.index') }}">Users</a>
-                        <a class="collapse-item" href="cards.html">Role</a>
-                        <a class="collapse-item" href="cards.html">Permission</a>
+                        {{-- <a class="collapse-item" href="cards.html">Role</a>
+                        <a class="collapse-item" href="cards.html">Permission</a> --}}
                     </div>
                 </div>
             </li>

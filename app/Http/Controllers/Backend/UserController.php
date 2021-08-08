@@ -76,6 +76,9 @@ class UserController extends Controller
             'email' => $request->email,
         ]);
 
+        //----------Or--------------
+          //$country->update($request->validated());
+
         return redirect()->route('users.index')->with('message', 'User Updated Succesfully');
     }
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 04, 2021 at 01:09 PM
+-- Generation Time: Aug 08, 2021 at 11:40 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.2
 
@@ -35,6 +35,16 @@ CREATE TABLE `cities` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `cities`
+--
+
+INSERT INTO `cities` (`id`, `state_id`, `name`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Raozan', '2021-08-08 03:28:27', '2021-08-08 03:28:27'),
+(2, 1, 'Muradpur', '2021-08-08 03:28:37', '2021-08-08 03:28:37'),
+(3, 2, 'Mirpur', '2021-08-08 03:28:49', '2021-08-08 03:28:49'),
+(4, 2, 'Noya Polton', '2021-08-08 03:29:13', '2021-08-08 03:29:13');
+
 -- --------------------------------------------------------
 
 --
@@ -48,6 +58,16 @@ CREATE TABLE `countries` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `countries`
+--
+
+INSERT INTO `countries` (`id`, `country_code`, `name`, `created_at`, `updated_at`) VALUES
+(1, 'BD', 'Bangladesh', '2021-08-08 00:16:21', '2021-08-08 00:16:21'),
+(2, 'USA', 'United State of America', '2021-08-08 00:16:30', '2021-08-08 00:17:30'),
+(3, 'UAE', 'United Arab Emarates', '2021-08-08 00:17:51', '2021-08-08 00:17:51'),
+(4, 'EGP', 'EGYPT', '2021-08-08 00:18:28', '2021-08-08 00:18:28');
 
 -- --------------------------------------------------------
 
@@ -153,6 +173,18 @@ CREATE TABLE `states` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `states`
+--
+
+INSERT INTO `states` (`id`, `country_id`, `name`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Chattogram', '2021-08-08 01:19:49', '2021-08-08 01:19:49'),
+(2, 1, 'Dhaka', '2021-08-08 01:20:46', '2021-08-08 01:20:46'),
+(3, 1, 'Rajshahi', '2021-08-08 01:22:47', '2021-08-08 01:22:47'),
+(4, 2, 'Alaska', '2021-08-08 01:23:40', '2021-08-08 01:23:40'),
+(5, 3, 'Dubai', '2021-08-08 01:23:54', '2021-08-08 01:23:54'),
+(6, 3, 'Abu Dahabi', '2021-08-08 01:24:08', '2021-08-08 01:24:08');
+
 -- --------------------------------------------------------
 
 --
@@ -177,7 +209,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `last_name`, `first_name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Shahed Suzan', 'Suzan', 'Shahed', 'suzan@gmail.com', NULL, '$2y$10$ZN5AOlKX8p.FP6hg4RWtMekFQ2HWo6UXKK5zlZ89A72iMlsx0KePO', NULL, '2021-08-04 05:08:54', '2021-08-04 05:08:54');
+(1, 'Shahed Suzan', 'Suzan', 'Shahed', 'suzan@gmail.com', NULL, '$2y$10$ZN5AOlKX8p.FP6hg4RWtMekFQ2HWo6UXKK5zlZ89A72iMlsx0KePO', 'bo29q7yN4MBbiKdoFccJEt7Xl42TYNIAepdjJyhXkDsYqrOPn8cuSRaakwql', '2021-08-04 05:08:54', '2021-08-04 05:08:54'),
+(2, 'Master admin', 'admin', 'Master', 'admin@gmail.com', NULL, '$2y$10$104WLQZ11gxrGBh3V2MCBuGG81cKn4O/vFCuUVwJovAMztGxf0mam', NULL, '2021-08-05 04:35:47', '2021-08-05 05:46:36'),
+(3, 'User', 'user', 'user', 'user@gmail.com', NULL, '$2y$10$M4txHRDnfeSvqTUOQoE.BurzyD99Ny0Bnc8Y6qIcI7zfH4VxKW3ka', NULL, '2021-08-05 04:42:38', '2021-08-05 04:42:38');
 
 --
 -- Indexes for dumped tables
@@ -253,13 +287,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cities`
 --
 ALTER TABLE `cities`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `countries`
 --
 ALTER TABLE `countries`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `departments`
@@ -289,13 +323,13 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `states`
 --
 ALTER TABLE `states`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
