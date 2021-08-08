@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 08, 2021 at 11:40 AM
+-- Generation Time: Aug 08, 2021 at 01:35 PM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.2
 
@@ -81,6 +81,15 @@ CREATE TABLE `departments` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `departments`
+--
+
+INSERT INTO `departments` (`id`, `name`, `created_at`, `updated_at`) VALUES
+(1, 'Food', '2021-08-08 05:18:35', '2021-08-08 05:18:35'),
+(2, 'Cloths', '2021-08-08 05:18:53', '2021-08-08 05:18:53'),
+(4, 'Communication', '2021-08-08 05:20:18', '2021-08-08 05:20:18');
 
 -- --------------------------------------------------------
 
@@ -299,7 +308,7 @@ ALTER TABLE `countries`
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `employees`
