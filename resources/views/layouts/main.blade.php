@@ -42,8 +42,8 @@
             <hr class="sidebar-divider">
             <!-- Nav Item - Dashboard -->
             <li class="nav-item">
-                <a class="nav-link" href="/employees">
-                    <span>Employee Management</span></a>
+              <a class="nav-link" href="/employees">
+                  <span>Employee Management</span></a>
             </li>
 
             <!-- Divider -->
@@ -146,7 +146,7 @@
 
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
+            <footer class="sticky-footer" style="background-color: rgb(221, 211, 211)"
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span>Copyright &copy; Your Website 2021</span>

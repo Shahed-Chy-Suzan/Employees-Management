@@ -1,0 +1,10 @@
+
+
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+				//-------------- Resources of Owner --------------
+						--YouTube: https://www.youtube.com/watch?v=xvLWgxExiEM
+						--YouTube: https://www.youtube.com/playlist?list=PL6tf8fRbavl3BlPPRpbxAu8sSanDKe6_a
+						--GitHub: https://github.com/laraveller/laravel-employees-management
+//---------------------------------------------------------------------------------------------------------------------------------------------

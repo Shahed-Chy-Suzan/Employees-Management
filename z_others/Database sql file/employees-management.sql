@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 08, 2021 at 01:35 PM
+-- Generation Time: Aug 09, 2021 at 12:51 PM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.2
 
@@ -43,7 +43,10 @@ INSERT INTO `cities` (`id`, `state_id`, `name`, `created_at`, `updated_at`) VALU
 (1, 1, 'Raozan', '2021-08-08 03:28:27', '2021-08-08 03:28:27'),
 (2, 1, 'Muradpur', '2021-08-08 03:28:37', '2021-08-08 03:28:37'),
 (3, 2, 'Mirpur', '2021-08-08 03:28:49', '2021-08-08 03:28:49'),
-(4, 2, 'Noya Polton', '2021-08-08 03:29:13', '2021-08-08 03:29:13');
+(4, 2, 'Noya Polton', '2021-08-08 03:29:13', '2021-08-08 03:29:13'),
+(6, 6, 'Al Ain', '2021-08-09 03:21:56', '2021-08-09 03:21:56'),
+(7, 3, 'Veramara', '2021-08-09 03:22:14', '2021-08-09 03:22:14'),
+(8, 5, 'BurjKalifa city', '2021-08-09 03:23:13', '2021-08-09 03:23:13');
 
 -- --------------------------------------------------------
 
@@ -113,6 +116,15 @@ CREATE TABLE `employees` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `last_name`, `first_name`, `middle_name`, `address`, `department_id`, `country_id`, `state_id`, `city_id`, `zip_code`, `birthdate`, `date_hired`, `created_at`, `updated_at`) VALUES
+(1, 'Karim', 'Mr', 'Abdul', 'Raozan, Ctg', 2, 1, 1, 1, '3434', '2021-08-02', '2021-08-09', '2021-08-09 00:33:02', '2021-08-09 00:33:02'),
+(2, 'Chy', 'Sajjad', 'Alam', 'Alam Bari', 1, 3, 6, 6, '5344', '2021-04-13', '2021-07-12', '2021-08-09 03:24:01', '2021-08-09 03:24:01'),
+(3, 'Islam', 'Shohel', 'Rana', 'South hingala', 4, 1, 2, 3, '57567', '2020-10-16', '2021-08-02', '2021-08-09 03:26:37', '2021-08-09 04:23:26');
 
 -- --------------------------------------------------------
 
@@ -218,7 +230,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `last_name`, `first_name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Shahed Suzan', 'Suzan', 'Shahed', 'suzan@gmail.com', NULL, '$2y$10$ZN5AOlKX8p.FP6hg4RWtMekFQ2HWo6UXKK5zlZ89A72iMlsx0KePO', 'bo29q7yN4MBbiKdoFccJEt7Xl42TYNIAepdjJyhXkDsYqrOPn8cuSRaakwql', '2021-08-04 05:08:54', '2021-08-04 05:08:54'),
+(1, 'Shahed Suzan', 'Suzan', 'Shahed', 'suzan@gmail.com', NULL, '$2y$10$ZN5AOlKX8p.FP6hg4RWtMekFQ2HWo6UXKK5zlZ89A72iMlsx0KePO', 'o6TUnWNKRmDI8cpWA0nuXuXX0QUnfapFAjQwPdjeYOHMm28uywdO5dt9p0pp', '2021-08-04 05:08:54', '2021-08-04 05:08:54'),
 (2, 'Master admin', 'admin', 'Master', 'admin@gmail.com', NULL, '$2y$10$104WLQZ11gxrGBh3V2MCBuGG81cKn4O/vFCuUVwJovAMztGxf0mam', NULL, '2021-08-05 04:35:47', '2021-08-05 05:46:36'),
 (3, 'User', 'user', 'user', 'user@gmail.com', NULL, '$2y$10$M4txHRDnfeSvqTUOQoE.BurzyD99Ny0Bnc8Y6qIcI7zfH4VxKW3ka', NULL, '2021-08-05 04:42:38', '2021-08-05 04:42:38');
 
@@ -296,7 +308,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cities`
 --
 ALTER TABLE `cities`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `countries`
@@ -314,7 +326,7 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`

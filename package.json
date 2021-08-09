@@ -24,5 +24,10 @@
         "vue-loader": "^15.9.7",
         "vue-template-compiler": "^2.6.12",
         "webpack": "5.44.0"
+    },
+    "dependencies": {
+        "moment": "^2.29.1",
+        "vue-router": "^3.5.2",
+        "vuejs-datepicker": "^1.6.2"
     }
 }

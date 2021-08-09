@@ -7,7 +7,7 @@
         <h1 class="h3 mb-0 text-gray-800">Cities</h1>
     </div>
     <div class="row">
-        <div class="card  mx-auto">
+        <div class="card mb-5 mx-auto">
           <div>
             @if (session()->has('message'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
