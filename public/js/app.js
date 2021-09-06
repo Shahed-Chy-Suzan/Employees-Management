@@ -2641,6 +2641,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -61129,7 +61131,13 @@ var render = function() {
                             key: department.id,
                             domProps: { value: department.id }
                           },
-                          [_vm._v(_vm._s(department.name))]
+                          [
+                            _vm._v(
+                              "\n                              " +
+                                _vm._s(department.name) +
+                                "\n                            "
+                            )
+                          ]
                         )
                       }),
                       0

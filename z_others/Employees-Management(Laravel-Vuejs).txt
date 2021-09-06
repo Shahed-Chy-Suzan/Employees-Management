@@ -1,0 +1,3913 @@
+
+//===========================================================================================
+
+			//-----******------ Employees-Management -------******--------//
+											***---	Laravel + Vue	---***
+
+//============================================================================================
+
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+				//-------------- Resources of Owner --------------
+						--YouTube: https://www.youtube.com/watch?v=xvLWgxExiEM
+						--YouTube: https://www.youtube.com/playlist?list=PL6tf8fRbavl3BlPPRpbxAu8sSanDKe6_a
+						--GitHub: https://github.com/laraveller/laravel-employees-management
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------
+		-- My_GitHub_repo: https://github.com/Shahed-Chy-Suzan/Employees-Management
+//---------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+//==================================================================================================
+											------------------ Start Project -----------------------
+//==================================================================================================
+		-- 1 --install laravel-8 command : composer create-project laravel/laravel employees-management
+		-- 2 --goto: https://github.com/laravel/ui
+		-- 3 -- command: composer require laravel/ui
+		-- 4 -- command: php artisan ui bootstrap --auth
+		-- 5 -- command: php artisan ui vue
+		-- 6 -- command: npm install
+		-- 7 -- command: npm run dev
+		
+		
+//--------------------------------------------------- .ENV -------------------------------------------------------------------------------------------
+			DB_CONNECTION=mysql
+			DB_HOST=127.0.0.1
+			DB_PORT=3306
+			DB_DATABASE=employees-management
+			DB_USERNAME=root
+			DB_PASSWORD=
+
+
+//--------------------------------------------package.json----------------------------------------------------------------------------------------------------
+				{
+					"private": true,
+					"scripts": {
+						"dev": "npm run development",
+						"development": "mix",
+						"watch": "mix watch",
+						"watch-poll": "mix watch -- --watch-options-poll=1000",
+						"hot": "mix watch --hot",
+						"prod": "npm run production",
+						"production": "mix --production"
+					},
+					"devDependencies": {
+						"axios": "^0.21",
+						"bootstrap": "^4.6.0",
+						"jquery": "^3.6",
+						"laravel-mix": "^6.0.6",
+						"lodash": "^4.17.19",
+						"popper.js": "^1.16.1",
+						"postcss": "^8.1.14",
+						"resolve-url-loader": "^3.1.2",
+						"sass": "^1.32.11",
+						"sass-loader": "^11.0.1",
+						"vue": "^2.6.12",
+						"vue-loader": "^15.9.7",
+						"vue-template-compiler": "^2.6.12",
+						"webpack": "5.44.0"								//added this manually then run npm, cz facing problem in vue-loader(15.9.7)	
+					},
+					"dependencies": {
+						"vue-router": "^3.5.2"
+					}
+				}
+				
+		//--"webpack": "5.44.0"	 //added this manually then run npm(command: npm install, then, npm run dev), cz facing problem in vue-loader(15.9.7)
+		
+		
+		
+		
+//---------------------create "Employee,Country,State,City,Department" model & migration-----------------------------------------
+		-- command: php artisan make:model Employee -m
+		-- command: php artisan make:model Country -m
+		-- command: php artisan make:model State -m
+		-- command: php artisan make:model City -m
+		
+		//--create database "employees-management" in phpmyadmin then connect in .env file.....then run "php artisan migrate"
+
+
+
+//--------------------------------database/migration/users--------------------------------------------------------------------
+				Schema::create('users', function (Blueprint $table) {
+					$table->id();
+					$table->string('username');
+					$table->string('last_name');
+					$table->string('first_name');
+					$table->string('email')->unique();
+					$table->timestamp('email_verified_at')->nullable();
+					$table->string('password');
+					$table->rememberToken();
+					$table->timestamps();
+				});
+
+
+//--------------------------------------database/migration/employees--------------------------------------------------------------------
+						Schema::create('employees', function (Blueprint $table) {
+						$table->id();
+						$table->string('last_name');
+						$table->string('first_name');
+						$table->string('middle_name')->nullable();
+						$table->string('address');
+						$table->foreignId('department_id')->constrained();
+						$table->foreignId('country_id')->constrained();
+						$table->foreignId('state_id')->constrained();
+						$table->foreignId('city_id')->constrained();
+						$table->char('zip_code');
+						$table->date('birthdate')->nullable();
+						$table->date('date_hired')->nullable();
+						$table->timestamps();
+					});
+					
+
+//--------------------------------------database/migration/countries--------------------------------------------------------------------
+					        Schema::create('countries', function (Blueprint $table) {
+								$table->id();
+								$table->char('country_code');
+								$table->string('name');
+								$table->timestamps();
+							});
+
+
+//--------------------------------------database/migration/states--------------------------------------------------------------------
+				Schema::create('states', function (Blueprint $table) {
+					$table->id();
+					$table->foreignId('country_id')->constrained();
+					$table->string('name');
+					$table->timestamps();
+				});
+
+
+//--------------------------------------database/migration/cities--------------------------------------------------------------------
+				        Schema::create('cities', function (Blueprint $table) {
+							$table->id();
+							$table->foreignId('state_id')->constrained();
+							$table->string('name');
+							$table->timestamps();
+						});
+
+
+//--------------------------------------database/migration/departments--------------------------------------------------------------------
+					Schema::create('departments', function (Blueprint $table) {
+						$table->id();
+						$table->string('name');
+						$table->timestamps();
+					});
+
+
+//******* ekhane amader k must "employees" table ta migration e sobar last e rakte hobe, bcz okhane onno foreignId gula lagbe onno table gula theke, so rename korlam jathe "employees" table ta soba last e eshe jai, then nicher command ta chalabo jathe agher migrate kora sob db gula drop hoye new vabe abar migrate hoy.
+
+
+//-------then run command: php artisan migrate:fresh
+														//Dropped all tables successfully.
+														//Migration table created successfully.
+
+
+
+
+//=========================================================================================================================================================
+
+//---------------------ekn amra database field onosate User Register form ta change korbo---------------------------------------------------------------
+
+//-----------------------------resources/views/auth/register.blade.php-----------------------------------------------------------------------
+		@extends('layouts.app')
+
+		@section('content')
+			<div class="container">
+				<div class="row justify-content-center">
+					<div class="col-md-8">
+						<div class="card">
+							<div class="card-header">{{ __('Register') }}</div>
+
+							<div class="card-body">
+								<form method="POST" action="{{ route('register') }}">
+									@csrf
+
+									<div class="form-group row">
+										<label for="username"
+											class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
+
+										<div class="col-md-6">
+											<input id="username" type="text"
+												class="form-control @error('username') is-invalid @enderror" name="username"
+												value="{{ old('username') }}" required autocomplete="username" autofocus>
+
+											@error('username')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="first_name"
+											class="col-md-4 col-form-label text-md-right">{{ __('First Name') }}</label>
+
+										<div class="col-md-6">
+											<input id="first_name" type="text"
+												class="form-control @error('first_name') is-invalid @enderror" name="first_name"
+												value="{{ old('first_name') }}" required autocomplete="first_name" autofocus>
+
+											@error('first_name')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="last_name"
+											class="col-md-4 col-form-label text-md-right">{{ __('Last Name') }}</label>
+
+										<div class="col-md-6">
+											<input id="last_name" type="text"
+												class="form-control @error('last_name') is-invalid @enderror" name="last_name"
+												value="{{ old('last_name') }}" required autocomplete="last_name" autofocus>
+
+											@error('last_name')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="email"
+											class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
+
+										<div class="col-md-6">
+											<input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
+												name="email" value="{{ old('email') }}" required autocomplete="email">
+
+											@error('email')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="password"
+											class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
+
+										<div class="col-md-6">
+											<input id="password" type="password"
+												class="form-control @error('password') is-invalid @enderror" name="password"
+												required autocomplete="new-password">
+
+											@error('password')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="password-confirm"
+											class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
+
+										<div class="col-md-6">
+											<input id="password-confirm" type="password" class="form-control"
+												name="password_confirmation" required autocomplete="new-password">
+										</div>
+									</div>
+
+									<div class="form-group row mb-0">
+										<div class="col-md-6 offset-md-4">
+											<button type="submit" class="btn btn-primary">
+												{{ __('Register') }}
+											</button>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		@endsection
+
+
+
+//--------------------------------------app/http/controller/RegisterController.php-----------------------------------------------------------------------
+			protected function validator(array $data)
+			{
+				return Validator::make($data, [
+					'username' => ['required', 'string', 'max:255', 'unique:users'],
+					'first_name' => ['required', 'string', 'max:255'],
+					'last_name' => ['required', 'string', 'max:255'],
+					'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+					'password' => ['required', 'string', 'min:8', 'confirmed'],
+				]);
+			}
+			.....
+			.....
+				protected function create(array $data)
+			{
+				return User::create([
+					'username' => $data['username'],
+					'first_name' => $data['first_name'],
+					'last_name' => $data['last_name'],
+					'email' => $data['email'],
+					'password' => Hash::make($data['password']),
+				]);
+			}
+
+
+//-------------------------------------------------app/Models/Users.php-----------------------------------------------------------------------
+			    protected $fillable = [
+					'username',
+					'last_name',
+					'first_name',
+					'email',
+					'password',
+				];
+
+//-------------------------------------------------resources/views/layouts/app.blade.php-----------------------------------------------------------------------
+				<a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+					{{ Auth::user()->username }}						//-----------------------
+				</a>
+
+
+
+
+
+//=========================================================================================================================================================
+
+
+//--ekkn amra " https://startbootstrap.com/theme/sb-admin-2 " ei link e diye admin dashboard download korbo. left-sidebar anar jonno er index file ta ene amader "views/layouts/main.blade.php" te rakbo. baki fontawesome+css+js link korai dibo.
+
+
+//-----------------------------resources/views/home.blade.php-----------------------------------------------------------------------
+						@extends('layouts.main')
+
+//---------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------
+		//--ekhane baki logout er kaj gula mane code gula amader orginal laravel er (app.blade.php) theke niye eshe bosiye diyechi.
+		
+		
+//------------------------app/http/controller/LoginController-------------------------------------------------------------------------------
+		//--ekhane amra 3bar vul login dile 5minute wait korte hobe ta kortechi.
+					
+					use AuthenticatesUsers;
+
+					protected $redirectTo = RouteServiceProvider::HOME;
+
+					protected $maxAttempts = 3; // Default is 5							//-------------------------
+					protected $decayMinutes = 5; // Default is 1						//-------------------------
+
+
+//============================================================================================================
+//============================================================================================================
+//============================================================================================================
+
+
+
+
+
+
+//-------------------------------------------------- User Management -------------------------------------------------------------------------------------
+		-- command: php artisan make:controller Backend/UserController --resource
+		
+		-- routes/web.php
+					use App\Http\Controllers\UserController;
+					Route::resource('users', UserController::class);
+					
+		-- Now, you can run bellow command and check create route lists:
+				- php artisan route:list --name=users
+							
+							
+		-- created folder & file:
+					-- views
+						--users
+							-- index.blade.php
+							-- edit.blade.php
+							-- create.blade.php
+							
+		-- php artisan make:request UserStoreRequest
+		-- ei Request/UserStoreRequest er vitor validation gula rakchi( function rules() er moddhe validation code && function authorize () e return true kore diyechi).....//UserController er store() method er 1st default peramete "Request" ta k change kore "UserStoreRequest" kore diyechi  ++ opore abar (use App\Http\Requests\UserStoreRequest;) diye bole diyechi.
+		
+		-- .... same vabe ....
+		-- php artisan make:request UserUpdateRequest
+		
+		-- for change password, command: php artisan make:controller Backend/ChangePasswordController
+
+
+
+//--------------------------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------------
+			<a class="collapse-item" href="{{ route('users.index') }}">Users</a>
+
+
+
+//--------------------------------------routes/web.php--------------------------------------------------------------------------------------------------------------
+		Route::get('/', function () {
+			return view('welcome');
+		});
+
+		Auth::routes();
+
+		Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+		Route::resource('users', UserController::class);
+
+
+		Route::post('users/{user}/change-password', [ChangePasswordController::class, 'change_password'])->name('users.change.password');
+
+
+
+//---------------------------------------app/Http/Controllers/Backend/UserController------------------------------------------------------------------
+			<?php
+
+			namespace App\Http\Controllers\Backend;
+
+			use App\Http\Controllers\Controller;
+			use App\Http\Requests\UserStoreRequest;
+			use App\Http\Requests\UserUpdateRequest;
+			use App\Models\User;
+			use Illuminate\Http\Request;
+			use Illuminate\Support\Facades\Hash;
+
+			class UserController extends Controller
+			{
+
+			//-------------------------Index----------------------------------------------
+				public function index(Request $request)
+				{
+				  $users = User::all();
+				  if ($request->has('search')) {
+					  $users = User::where('username', 'like', "%{$request->search}%")->orWhere('email', 'like', "%{$request->search}%")->get();
+				  }
+				  return view('users.index', compact('users'));
+				}
+
+
+			//-------------------------Create/Add----------------------------------------------
+				public function create()
+				{
+					return view('users.create');
+				}
+
+
+			//-------------------------Store/Save----------------------------------------------
+				public function store(UserStoreRequest $request)
+				{
+					User::create([
+					  'username' => $request->username,
+					  'first_name' => $request->first_name,
+					  'last_name' => $request->last_name,
+					  'email' => $request->email,
+					  'password' => Hash::make($request->password),
+					]);
+
+					//-----or---------
+					  // User::create($request->validated());
+
+					//-----or---------
+					  // $request->validated();
+
+					  // User::create([
+					  //   'username' => $request->username,
+					  //   'first_name' => $request->first_name,
+					  //   'last_name' => $request->last_name,
+					  //   'email' => $request->email,
+					  //   'password' => Hash::make($request->password),
+					  // ]);
+
+					return redirect()->route('users.index')->with('message', 'User Register Succesfully');
+				}
+
+
+			//-------------------------Edit----------------------------------------------
+				public function edit(User $user)
+				{
+					return view('users.edit', compact('user'));
+				}
+
+
+			//-------------------------Update----------------------------------------------
+				public function update(UserUpdateRequest $request, User $user)
+				{
+					$user->update([
+						'username' => $request->username,
+						'first_name' => $request->first_name,
+						'last_name' => $request->last_name,
+						'email' => $request->email,
+					]);
+
+					//----------Or--------------
+					  //$country->update($request->validated());
+
+					return redirect()->route('users.index')->with('message', 'User Updated Succesfully');
+				}
+
+
+			//-------------------------Delete----------------------------------------------
+				public function destroy(User $user)
+				{
+					if (auth()->user()->id == $user->id) {
+						return redirect()->route('users.index')->with('message', 'You are deleting yourself.');
+					}
+					$user->delete();
+					return redirect()->route('users.index')->with('message', 'User Deleted Succesfully');
+				}
+			}
+
+
+
+
+//---------------------------------------app/Http/Controllers/Backend/ChangePasswordController-------------------------------------------------
+<?php
+
+namespace App\Http\Controllers\Backend;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+class ChangePasswordController extends Controller
+{
+    public function change_password(Request $request, User $user)
+    {
+        $request->validate([
+          'password' => ['required', 'string', 'confirmed'],
+        ]);
+
+        $user->update([
+          'password' => Hash::make($request->password)
+        ]);
+
+        return redirect()->route('users.index')->with('message', 'User Password Updated Succesfully');
+    }
+}
+
+
+//---------------------------------------views/users/index.blade.php-------------------------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Users</h1>
+    </div>
+
+    <div class="row">
+        <div class="card mx-auto border-success">
+            <div>
+                @if (session()->has('message'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                      <strong>{{ session('message')}}</strong>
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                @endif
+            </div>
+            <div class="card-header">
+                <div class="row">
+                    <div class="col">
+                        <form method="GET" action="{{ route('users.index') }}">
+                            <div class="form-row align-items-center">
+                                <div class="col">
+                                    <input type="search" name="search" class="form-control mb-2" id="inlineFormInput"
+                                        placeholder="Search here...">
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-primary mb-2">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <a href="{{ route('users.create') }}" class="btn btn-primary mb-2">Create</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#Id</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr>
+                                <th scope="row">{{ $user->id }}</th>
+                                <td>{{ $user->username }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-success">Edit</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+//---------------------------------------views/users/edit.blade.php----------------------------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Users</h1>
+    </div>
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-success">
+                    <div class="card-header">
+                        {{ __('Update User') }}
+                        <a href="{{ route('users.index') }}" class="float-right">Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('users.update', $user->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group row">
+                                <label for="username"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="username" type="text"
+                                        class="form-control @error('username') is-invalid @enderror" name="username"
+                                        value="{{ old('username', $user->username) }}" required autocomplete="username"
+                                        autofocus>
+
+                                    @error('username')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="first_name"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('First Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="first_name" type="text"
+                                        class="form-control @error('first_name') is-invalid @enderror" name="first_name"
+                                        value="{{ old('first_name', $user->first_name) }}" required
+                                        autocomplete="first_name" autofocus>
+
+                                    @error('first_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="last_name"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Last Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="last_name" type="text"
+                                        class="form-control @error('last_name') is-invalid @enderror" name="last_name"
+                                        value="{{ old('last_name', $user->last_name) }}" required
+                                        autocomplete="last_name" autofocus>
+
+                                    @error('last_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="email"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                                        name="email" value="{{ old('email', $user->email) }}">
+
+                                    @error('email')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Update User') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="m-2 p-2">
+                    <form method="POST" action="{{ route('users.destroy', $user->id) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger">Delete {{ $user->username }}</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card border-success">
+                    <div class="card-header">{{ __('Change Password') }}</div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('users.change.password', $user->id) }}">
+                            @csrf
+                            <div class="form-group row">
+                                <label for="password"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="password" type="password"
+                                        class="form-control @error('password') is-invalid @enderror" name="password"
+                                        autocomplete="new-password">
+
+                                    @error('password')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="password-confirm"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="password-confirm" type="password" class="form-control"
+                                        name="password_confirmation" autocomplete="new-password">
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Update Password') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+//---------------------------------------views/users/create.blade.php-------------------------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Users</h1>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        {{ __('Register') }}
+                        <a href="{{ route('users.index') }}" class="float-right">Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('users.store') }}">
+                            @csrf
+
+                            <div class="form-group row">
+                                <label for="username"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="username" type="text"
+                                        class="form-control @error('username') is-invalid @enderror" name="username"
+                                        value="{{ old('username') }}" required autocomplete="username" autofocus>
+
+                                    @error('username')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="first_name"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('First Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="first_name" type="text"
+                                        class="form-control @error('first_name') is-invalid @enderror" name="first_name"
+                                        value="{{ old('first_name') }}" required autocomplete="first_name" autofocus>
+
+                                    @error('first_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="last_name"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Last Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="last_name" type="text"
+                                        class="form-control @error('last_name') is-invalid @enderror" name="last_name"
+                                        value="{{ old('last_name') }}" required autocomplete="last_name" autofocus>
+
+                                    @error('last_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="email"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                                        name="email" value="{{ old('email') }}" required autocomplete="email">
+
+                                    @error('email')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="password"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="password" type="password"
+                                        class="form-control @error('password') is-invalid @enderror" name="password"
+                                        required autocomplete="new-password">
+
+                                    @error('password')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Register') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+//---------------------------------------Request/UserStoreRequest--------------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UserStoreRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;      //---------------
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()           //---------------------
+    {
+        return [
+            'username' => ['required', 'string', 'max:255', 'unique:users'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
+        ];
+    }
+}
+
+
+//---------------------------------------Request/UserUpdateRequest-----------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UserUpdateRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'username' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ];
+    }
+}
+
+//============//===========//===============//=============//==============//============//=============//==========//===
+//============//===========//===============//=============//==============//============//=============//==========//===
+//============//===========//===============//=============//==============//============//=============//==========//===
+
+
+
+
+
+
+
+
+
+//========================================// Employee Management //==============================================
+
+				-- command: php artisan make:controller Backend/CountryController
+				
+				-- command: php artisan make:model Country -m
+				
+				-- routes/web.php
+					use App\Http\Controllers\Backend\CountryController;
+					Route::resource('countries', CountryController::class);
+					
+				-- Now, you can run bellow command and check create route lists:
+						- php artisan route:list --name=countries
+									
+									
+				-- created folder & file:
+							-- views
+								--countries
+									-- index.blade.php
+									-- edit.blade.php
+									-- create.blade.php
+
+				-- php artisan make:request CountryStoreRequest
+				-- ei Request/CountryStoreRequest er vitor validation gula rakchi( function rules() er moddhe validation code && function authorize () e return true kore diyechi).....//CountryController er store() method er 1st default peramete "Request" ta k change kore "CountryStoreRequest" kore diyechi  ++ opore abar (use App\Http\Requests\UserStoreRequest;) diye bole diyechi.
+
+
+//--------------------------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------------
+			<a class="collapse-item" href="{{ route('countries.index') }}">Country</a>
+
+//--------------------------------------routes/web.php---------------------------------------------------------------------------------------------------------------
+			Route::resource('countries', CountryController::class);
+
+//--------------------------------app/Models/Country.php---------------------------------------------------------------------------------------------------------
+			<?php
+
+			namespace App\Models;
+
+			use Illuminate\Database\Eloquent\Factories\HasFactory;
+			use Illuminate\Database\Eloquent\Model;
+
+			class Country extends Model
+			{
+				use HasFactory;
+
+
+				protected $fillable = ['country_code', 'name'];
+
+				// public function states()
+				// {
+				//     return $this->hasMany(State::class);
+				// }
+			}
+
+
+
+//--------------------------------app/Http/Controllers/Backend/CountryController--------------------------------------------------------------------------
+<?php
+
+namespace App\Http\Controllers\Backend;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CountryStoreRequest;
+use App\Models\Country;
+use Illuminate\Http\Request;
+
+class CountryController extends Controller
+{
+    public function index(Request $request)
+    {
+        $countries = Country::all();
+        if ($request->has('search')) {
+            $countries = Country::where('name', 'like', "%{$request->search}%")->orWhere('country_code', 'like', "%{$request->search}%")->get();
+        }
+
+        return view('countries.index', compact('countries'));
+    }
+
+    public function create()
+    {
+        return view('countries.create');
+    }
+
+    public function store(CountryStoreRequest $request)
+    {
+        Country::create($request->validated());
+
+        return redirect()->route('countries.index')->with('message', 'Country Created Successfully');
+    }
+
+    public function edit(Country $country)
+    {
+        return view('countries.edit', compact('country'));
+    }
+
+    public function update(CountryStoreRequest $request, Country $country)
+    {
+        $country->update($request->validated());
+
+        return redirect()->route('countries.index')->with('message', 'Country Updated Successfully');
+    }
+
+    public function destroy(Country $country)
+    {
+        $country->delete();
+
+        return redirect()->route('countries.index')->with('message', 'Country Deleted Successfully');
+    }
+}
+
+
+//--------------------------------app/Http/Request/CountryStoreRequest--------------------------------------------------------------------------------------
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class CountryStoreRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'country_code' => ['required', 'max:3'],
+            'name'         => ['required']
+        ];
+    }
+}
+
+
+//-------------------------------resources/views/countries/create.blade.php----------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Countries</h1>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        {{ __('Create Country') }}
+                        <a href="{{ route('countries.index') }}" class="float-right">Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('countries.store') }}">
+                            @csrf
+
+                            <div class="form-group row">
+                                <label for="country_code"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Country Code') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="country_code" type="text"
+                                        class="form-control @error('country_code') is-invalid @enderror" name="country_code"
+                                        value="{{ old('country_code') }}" required autocomplete="country_code" autofocus>
+
+                                    @error('country_code')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                                        name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+
+                                    @error('name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Store') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+//-------------------------------resources/views/countries/index.blade.php-----------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">countries</h1>
+    </div>
+    <div class="row">
+        <div class="card  mx-auto">
+          <div>
+            @if (session()->has('message'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  <strong>{{ session('message')}}</strong>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+            @endif
+          </div>
+            <div class="card-header">
+                <div class="row">
+                    <div class="col">
+                        <form method="GET" action="{{ route('countries.index') }}">
+                            <div class="form-row align-items-center">
+                                <div class="col">
+                                    <input type="search" name="search" class="form-control mb-2" id="inlineFormInput"
+                                        placeholder="Search here...">
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-primary mb-2">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <a href="{{ route('countries.create') }}" class="btn btn-primary mb-2">Create</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#Id</th>
+                            <th scope="col">Country Code</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($countries as $country)
+                            <tr>
+                                <th scope="row">{{ $country->id }}</th>
+                                <td>{{ $country->country_code }}</td>
+                                <td>{{ $country->name }}</td>
+                                <td>
+                                    <a href="{{ route('countries.edit', $country->id) }}" class="btn btn-success">Edit</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+//-------------------------------resources/views/countries/edit.blade.php-------------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Countries</h1>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        {{ __('Edit Country') }}
+                        <a href="{{ route('countries.index') }}" class="float-right">Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('countries.update', $country->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group row">
+                                <label for="country_code"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Country Code') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="country_code" type="text"
+                                        class="form-control @error('country_code') is-invalid @enderror" name="country_code"
+                                        value="{{ old('country_code', $country->country_code) }}" required>
+
+                                    @error('country_code')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                                        name="name" value="{{ old('name', $country->name) }}" required autocomplete="name"
+                                        autofocus>
+
+                                    @error('name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Update') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="m-2 p-2">
+                    <form method="POST" action="{{ route('countries.destroy', $country->id) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger">Delete {{ $country->country_code }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+//===========//==========//==========//==========//============//============//===========//===========//=======//==
+//===========//==========//==========//==========//============//============//===========//===========//=======//==
+//===========//==========//==========//==========//============//============//===========//===========//=======//==
+
+
+
+
+//-------------------------------------------------- User Management -------------------------------------------------------------------------------------
+		-- command: php artisan make:controller Backend/StateController --resource
+		
+		-- routes/web.php
+					use App\Http\Controllers\StateController;
+					Route::resource('states', StateController::class);
+					
+		-- Now, you can run bellow command and check create route lists:
+				- php artisan route:list --name=states
+							
+							
+		-- created folder & file:
+					-- views
+						--states
+							-- index.blade.php
+							-- edit.blade.php
+							-- create.blade.php
+							
+		-- php artisan make:request StateStoreRequest
+		-- ei Request/StateStoreRequest er vitor validation gula rakchi( function rules() er moddhe validation code && function authorize () e return true kore diyechi).....//StateController er store() method er 1st default peramete "Request" ta k change kore "StateStoreRequest" kore diyechi  ++ opore abar (use App\Http\Requests\StateStoreRequest;) diye bole diyechi.
+		
+
+
+//--------------------------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------------
+				<a class="collapse-item" href="{{ route('states.index') }}">State</a>
+				
+				
+//--------------------------------------routes/web.php---------------------------------------------------------------------------------------------------------------
+				use App\Http\Controllers\Backend\StateController;
+				Route::resource('states', StateController::class);
+				
+				
+//--------------------------------app/Models/State.php---------------------------------------------------------------------------------------------------------
+				<?php
+
+				namespace App\Models;
+
+				use Illuminate\Database\Eloquent\Factories\HasFactory;
+				use Illuminate\Database\Eloquent\Model;
+
+				class State extends Model
+				{
+					use HasFactory;
+
+					protected $fillable = ['country_id', 'name'];
+
+					public function country()
+					{
+						return $this->belongsTo(Country::class);
+					}
+
+					// public function cities()
+					// {
+					//     return $this->hasMany(City::class);
+					// }
+				}
+				
+//--------------------------------app/Models/Country.php---------------------------------------------------------------------------------------------------------
+					public function states()
+					{
+						return $this->hasMany(State::class);
+					}
+					
+					
+//--------------------------------app/Http/Controllers/Backend/StateController--------------------------------------------------------------------------
+				<?php
+
+				namespace App\Http\Controllers\Backend;
+
+				use App\Http\Controllers\Controller;
+				use App\Http\Requests\StateStoreRequest;
+				use App\Models\Country;
+				use App\Models\State;
+				use Illuminate\Http\Request;
+
+				class StateController extends Controller
+				{
+					/**
+					 * Display a listing of the resource.
+					 *
+					 * @return \Illuminate\Http\Response
+					 */
+					public function index(Request $request)
+					{
+						$states = State::all();
+						if ($request->has('search')) {
+							$states = State::where('name', 'like', "%{$request->search}%")->get();
+						}
+
+						return view('states.index', compact('states'));
+					}
+
+					/**
+					 * Show the form for creating a new resource.
+					 *
+					 * @return \Illuminate\Http\Response
+					 */
+					public function create()
+					{
+						$countries = Country::all();
+						return view('states.create', compact('countries'));
+					}
+
+					/**
+					 * Store a newly created resource in storage.
+					 *
+					 * @param  \Illuminate\Http\Request  $request
+					 * @return \Illuminate\Http\Response
+					 */
+					public function store(StateStoreRequest $request)
+					{
+						State::create($request->validated());
+						return redirect()->route('states.index')->with('message', 'State Created Successfully');
+					}
+
+					/**
+					 * Show the form for editing the specified resource.
+					 *
+					 * @param  int  $id
+					 * @return \Illuminate\Http\Response
+					 */
+					public function edit(State $state)
+					{
+						$countries = Country::all();
+						return view('states.edit', compact('state', 'countries'));
+					}
+
+					/**
+					 * Update the specified resource in storage.
+					 *
+					 * @param  \Illuminate\Http\Request  $request
+					 * @param  int  $id
+					 * @return \Illuminate\Http\Response
+					 */
+					public function update(StateStoreRequest $request, State $state)
+					{
+						$state->update([
+							'country_id' => $request->country_id,
+							'name'       => $request->name
+						]);
+						return redirect()->route('states.index')->with('message', 'State Updated Successfully');
+					}
+
+					/**
+					 * Remove the specified resource from storage.
+					 *
+					 * @param  int  $id
+					 * @return \Illuminate\Http\Response
+					 */
+					public function destroy(State $state)
+					{
+						$state->delete();
+						return redirect()->route('states.index')->with('message', 'State Deleted Successfully');
+					}
+				}
+
+
+
+//--------------------------------app/Http/Request/StateStoreRequest--------------------------------------------------------------------------------------
+			<?php
+
+			namespace App\Http\Requests;
+
+			use Illuminate\Foundation\Http\FormRequest;
+
+			class StateStoreRequest extends FormRequest
+			{
+				/**
+				 * Determine if the user is authorized to make this request.
+				 *
+				 * @return bool
+				 */
+				public function authorize()
+				{
+					return true;
+				}
+
+				/**
+				 * Get the validation rules that apply to the request.
+				 *
+				 * @return array
+				 */
+				public function rules()
+				{
+					return [
+						'country_id' => ['required'],
+						'name' => ['required']
+					];
+				}
+			}
+
+
+//-------------------------------resources/views/states/create.blade.php----------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">States</h1>
+    </div>
+    <div class="container  mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        {{ __('Create State') }}
+                        <a href="{{ route('states.index') }}" class="float-right">Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('states.store') }}">
+                            @csrf
+
+                            <div class="form-group row">
+                                <label for="country_code"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Choose Country') }}</label>
+
+                                <div class="col-md-6">
+                                    <select name="country_id" class="form-control" aria-label="Default select example">
+                                        <option selected disabled>Open this select menu</option>
+                                        @foreach ($countries as $country)
+                                            <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_code')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('State Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                                        name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+
+                                    @error('name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Store') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+//-------------------------------resources/views/states/index.blade.php-----------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">States</h1>
+    </div>
+    <div class="row mb-5">
+        <div class="card  mx-auto">
+          <div>
+            @if (session()->has('message'))
+                <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                  <strong>{{ session('message')}}</strong>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+            @endif
+          </div>
+            <div class="card-header">
+                <div class="row">
+                    <div class="col">
+                        <form method="GET" action="{{ route('states.index') }}">
+                            <div class="form-row align-items-center">
+                                <div class="col">
+                                    <input type="search" name="search" class="form-control mb-2" id="inlineFormInput"
+                                        placeholder="Search">
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-primary mb-2">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <a href="{{ route('states.create') }}" class="btn btn-primary mb-2">Create</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#Id</th>
+                            <th scope="col">Country Code</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($states as $state)
+                            <tr>
+                                <th scope="row">{{ $state->id }}</th>
+                                <td>{{ $state->country->country_code }}</td>
+                                <td>{{ $state->name }}</td>
+                                <td>
+                                    <a href="{{ route('states.edit', $state->id) }}" class="btn btn-success">Edit</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+//-------------------------------resources/views/states/edit.blade.php-------------------------------------------------------------------------------------
+@extends('layouts.main')
+
+@section('content')
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">States</h1>
+    </div>
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        {{ __('Create State') }}
+                        <a href="{{ route('states.index') }}" class="float-right">Back</a>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="POST" action="{{ route('states.update', $state->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group row">
+                                <label for="country_code"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('Choose Country') }}</label>
+
+                                <div class="col-md-6">
+                                    <select name="country_id" class="form-control" aria-label="Default select example">
+                                        <option selected disabled>Open this select menu</option>
+                                        @foreach ($countries as $country)
+                                            <option value="{{ $country->id }}"
+                                                {{ $country->id == $state->country_id ? 'selected' : '' }}>
+                                                {{ $country->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_code')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="name"
+                                    class="col-md-4 col-form-label text-md-right">{{ __('State Name') }}</label>
+
+                                <div class="col-md-6">
+                                    <input id="name" type="text"
+                                        class="form-control @error('name') is-invalid @enderror" name="name"
+                                        value="{{ old('name', $state->name) }}" required>
+
+                                    @error('name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Update') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="m-2 p-2">
+                    <form method="POST" action="{{ route('states.destroy', $state->id) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger">Delete {{ $state->name }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+
+
+
+
+
+
+//-------------------------------------------------- User Management -------------------------------------------------------------------------------------
+		-- command: php artisan make:controller Backend/CityController --resource
+		
+		-- routes/web.php
+					use App\Http\Controllers\CityController;
+					Route::resource('cities', CityController::class);
+					
+		-- Now, you can run bellow command and check create route lists:
+				- php artisan route:list --name=cities
+							
+							
+		-- created folder & file:
+					-- views
+						--cities
+							-- index.blade.php
+							-- edit.blade.php
+							-- create.blade.php
+							
+		-- php artisan make:request CityStoreRequest
+		-- ei Request/CityStoreRequest er vitor validation gula rakchi( function rules() er moddhe validation code && function authorize () e return true kore diyechi).....//CityController er store() method er 1st default peramete "Request" ta k change kore "CityStoreRequest" kore diyechi  ++ opore abar (use App\Http\Requests\CityStoreRequest;) diye bole diyechi.
+
+
+//--------------------------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------------
+			<a class="collapse-item" href="{{ route('cities.index') }}">City</a>
+		 
+//--------------------------------------routes/web.php---------------------------------------------------------------------------------------------------------------
+			Route::resource('cities', CityController::class);
+			
+//--------------------------------app/Models/City.php---------------------------------------------------------------------------------------------------------
+			<?php
+
+			namespace App\Models;
+
+			use Illuminate\Database\Eloquent\Factories\HasFactory;
+			use Illuminate\Database\Eloquent\Model;
+
+			class City extends Model
+			{
+				use HasFactory;
+
+				protected $fillable =['state_id', 'name'];
+
+				public function state()
+				{
+					return $this->belongsTo(State::class);
+				}
+			}
+
+
+//--------------------------------app/Models/State.php---------------------------------------------------------------------------------------------------------
+			<?php
+
+			namespace App\Models;
+
+			use Illuminate\Database\Eloquent\Factories\HasFactory;
+			use Illuminate\Database\Eloquent\Model;
+
+			class State extends Model
+			{
+				use HasFactory;
+
+				protected $fillable = ['country_id', 'name'];
+
+				public function country()
+				{
+					return $this->belongsTo(Country::class);
+				}
+
+				public function cities()							//----------------------------------
+				{
+					return $this->hasMany(City::class);
+				}
+			}
+
+
+//--------------------------------app/Http/Controllers/Backend/CityController--------------------------------------------------------------------------
+			<?php
+
+			namespace App\Http\Controllers\Backend;
+
+			use App\Http\Controllers\Controller;
+			use App\Http\Requests\CityStoreRequest;
+			use App\Models\City;
+			use App\Models\State;
+			use Illuminate\Http\Request;
+
+			class CityController extends Controller
+			{
+				/**
+				 * Display a listing of the resource.
+				 *
+				 * @return \Illuminate\Http\Response
+				 */
+				public function index(Request $request)
+				{
+					$cities = City::all();
+					if ($request->has('search')) {
+						$cities = City::where('name', 'like', "%{$request->search}%")->get();
+					}
+
+					return view('cities.index', compact('cities'));
+				}
+
+				/**
+				 * Show the form for creating a new resource.
+				 *
+				 * @return \Illuminate\Http\Response
+				 */
+				public function create()
+				{
+					$states = State::all();
+
+					return view('cities.create', compact('states'));
+				}
+
+				/**
+				 * Store a newly created resource in storage.
+				 *
+				 * @param  \Illuminate\Http\Request  $request
+				 * @return \Illuminate\Http\Response
+				 */
+				public function store(CityStoreRequest $request)
+				{
+					City::create($request->validated());
+
+					return redirect()->route('cities.index')->with('message', 'City Created Successfully');
+				}
+
+				/**
+				 * Show the form for editing the specified resource.
+				 *
+				 * @param  int  $id
+				 * @return \Illuminate\Http\Response
+				 */
+				public function edit(City $city)
+				{
+					$states = State::all();
+					return view('cities.edit', compact('city', 'states'));
+				}
+
+				/**
+				 * Update the specified resource in storage.
+				 *
+				 * @param  \Illuminate\Http\Request  $request
+				 * @param  int  $id
+				 * @return \Illuminate\Http\Response
+				 */
+				public function update(CityStoreRequest $request, City $city)
+				{
+					$city->update([
+						'state_id' => $request->state_id,
+						'name'     => $request->name
+					]);
+					return redirect()->route('cities.index')->with('message', 'City Updated Successfully');
+				}
+
+				/**
+				 * Remove the specified resource from storage.
+				 *
+				 * @param  int  $id
+				 * @return \Illuminate\Http\Response
+				 */
+				public function destroy(City $city)
+				{
+					$city->delete();
+
+					return redirect()->route('cities.index')->with('message', 'City Deleted Successfully');
+				}
+			}
+
+//--------------------------------app/Http/Request/CityStoreRequest--------------------------------------------------------------------------------------
+			<?php
+
+			namespace App\Http\Requests;
+
+			use Illuminate\Foundation\Http\FormRequest;
+
+			class CityStoreRequest extends FormRequest
+			{
+				/**
+				 * Determine if the user is authorized to make this request.
+				 *
+				 * @return bool
+				 */
+				public function authorize()
+				{
+					return true;
+				}
+
+				/**
+				 * Get the validation rules that apply to the request.
+				 *
+				 * @return array
+				 */
+				public function rules()
+				{
+					return [
+						'state_id' => ['required'],
+						'name'    => ['required']
+					];
+				}
+			}
+
+
+//-------------------------------resources/views/cities/create.blade.php----------------------------------------------------------------------------------
+			@extends('layouts.main')
+
+			@section('content')
+
+				<!-- Page Heading -->
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 class="h3 mb-0 text-gray-800">Cities</h1>
+				</div>
+				<div class="container">
+					<div class="row justify-content-center">
+						<div class="col-md-8">
+							<div class="card">
+								<div class="card-header">
+									{{ __('Create City') }}
+									<a href="{{ route('cities.index') }}" class="float-right">Back</a>
+								</div>
+
+								<div class="card-body">
+									<form method="POST" action="{{ route('cities.store') }}">
+										@csrf
+
+										<div class="form-group row">
+											<label for="country_code"
+												class="col-md-4 col-form-label text-md-right">{{ __('Choose State') }}</label>
+
+											<div class="col-md-6">
+												<select name="state_id" class="form-control" aria-label="Default select example">
+													<option selected disabled>Select State</option>
+													@foreach ($states as $state)
+														<option value="{{ $state->id }}">{{ $state->name }}</option>
+													@endforeach
+												</select>
+												@error('country_code')
+													<span class="invalid-feedback" role="alert">
+														<strong>{{ $message }}</strong>
+													</span>
+												@enderror
+											</div>
+										</div>
+
+										<div class="form-group row">
+											<label for="name" class="col-md-4 col-form-label text-md-right">{{ __('City Name') }}</label>
+
+											<div class="col-md-6">
+												<input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+													name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+
+												@error('name')
+													<span class="invalid-feedback" role="alert">
+														<strong>{{ $message }}</strong>
+													</span>
+												@enderror
+											</div>
+										</div>
+
+										<div class="form-group row mb-0">
+											<div class="col-md-6 offset-md-4">
+												<button type="submit" class="btn btn-primary">
+													{{ __('Store') }}
+												</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			@endsection
+
+//-------------------------------resources/views/cities/index.blade.php-----------------------------------------------------------------------------------
+		@extends('layouts.main')
+
+		@section('content')
+
+			<!-- Page Heading -->
+			<div class="d-sm-flex align-items-center justify-content-between mb-4">
+				<h1 class="h3 mb-0 text-gray-800">Cities</h1>
+			</div>
+			<div class="row">
+				<div class="card  mx-auto">
+				  <div>
+					@if (session()->has('message'))
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
+						  <strong>{{ session('message')}}</strong>
+						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						  </button>
+						</div>
+					@endif
+				  </div>
+					<div class="card-header">
+						<div class="row">
+							<div class="col">
+								<form method="GET" action="{{ route('cities.index') }}">
+									<div class="form-row align-items-center">
+										<div class="col">
+											<input type="search" name="search" class="form-control mb-2" id="inlineFormInput"
+												placeholder="Search">
+										</div>
+										<div class="col">
+											<button type="submit" class="btn btn-primary mb-2">Search</button>
+										</div>
+									</div>
+								</form>
+							</div>
+							<div>
+								<a href="{{ route('cities.create') }}" class="btn btn-primary mb-2">Create</a>
+							</div>
+						</div>
+					</div>
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr>
+									<th scope="col">#Id</th>
+									<th scope="col">State Name</th>
+									<th scope="col">City Name</th>
+									<th scope="col">Manage</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach ($cities as $city)
+									<tr>
+										<th scope="row">{{ $city->id }}</th>
+										<td>{{ $city->state->name }}</td>
+										<td>{{ $city->name }}</td>
+										<td>
+											<a href="{{ route('cities.edit', $city->id) }}" class="btn btn-success">Edit</a>
+										</td>
+									</tr>
+								@endforeach
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		@endsection
+
+//-------------------------------resources/views/cities/edit.blade.php-------------------------------------------------------------------------------------
+		@extends('layouts.main')
+
+		@section('content')
+
+			<!-- Page Heading -->
+			<div class="d-sm-flex align-items-center justify-content-between mb-4">
+				<h1 class="h3 mb-0 text-gray-800">Cities</h1>
+			</div>
+			<div class="container">
+				<div class="row justify-content-center">
+					<div class="col-md-8">
+						<div class="card">
+							<div class="card-header">
+								{{ __('Edit City') }}
+								<a href="{{ route('cities.index') }}" class="float-right">Back</a>
+							</div>
+
+							<div class="card-body">
+								<form method="POST" action="{{ route('cities.update', $city->id) }}">
+									@csrf
+									@method('PUT')
+									<div class="form-group row">
+										<label for="country_code"
+											class="col-md-4 col-form-label text-md-right">{{ __('Choose State') }}</label>
+
+										<div class="col-md-6">
+											<select name="state_id" class="form-control" aria-label="Default select example">
+												<option selected disabled>Open this select menu</option>
+												@foreach ($states as $state)
+													<option value="{{ $state->id }}"
+														{{ $state->id == $city->state_id ? 'selected' : '' }}>
+														{{ $state->name }}</option>
+												@endforeach
+											</select>
+											@error('state_id')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="name"
+											class="col-md-4 col-form-label text-md-right">{{ __('City Name') }}</label>
+
+										<div class="col-md-6">
+											<input id="name" type="text"
+												class="form-control @error('name') is-invalid @enderror" name="name"
+												value="{{ old('name', $city->name) }}" required>
+
+											@error('name')
+												<span class="invalid-feedback" role="alert">
+													<strong>{{ $message }}</strong>
+												</span>
+											@enderror
+										</div>
+									</div>
+
+									<div class="form-group row mb-0">
+										<div class="col-md-6 offset-md-4">
+											<button type="submit" class="btn btn-primary">
+												{{ __('Update') }}
+											</button>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+						<div class="m-2 p-2">
+							<form method="POST" action="{{ route('cities.destroy', $city->id) }}">
+								@csrf
+								@method('DELETE')
+								<button class="btn btn-danger">Delete {{ $city->name }}</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		@endsection
+
+
+
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+
+
+
+
+
+
+//-------------------------------------------------- Department -------------------------------------------------------------------------------------
+		-- command: php artisan make:controller Backend/DepartmentController --resource
+		
+		-- routes/web.php
+					use App\Http\Controllers\DepartmentController;
+					Route::resource('departments', DepartmentController::class);
+					
+		-- Now, you can run bellow command and check create route lists:
+				- php artisan route:list --name=departments
+							
+							
+		-- created folder & file:
+					-- views
+						--departments
+							-- index.blade.php
+							-- edit.blade.php
+							-- create.blade.php
+							
+		-- php artisan make:request DepartmentStoreRequest
+		-- ei Request/DepartmentStoreRequest er vitor validation gula rakchi( function rules() er moddhe validation code && function authorize () e return true kore diyechi).....//DepartmentController er store() method er 1st default peramete "Request" ta k change kore "DepartmentStoreRequest" kore diyechi  ++ opore abar (use App\Http\Requests\DepartmentStoreRequest;) diye bole diyechi.
+
+
+//--------------------------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------------
+				<a class="collapse-item" href="{{ route('departments.index') }}">Department</a>
+				
+//--------------------------------------routes/web.php---------------------------------------------------------------------------------------------------------------
+			Route::resource('departments', DepartmentController::class);
+			
+			
+//--------------------------------app/Models/Department.php---------------------------------------------------------------------------------------------------
+				protected $fillable = ['name'];
+
+//--------------------------------app/Http/Controllers/Backend/DepartmentController--------------------------------------------------------------------
+				<?php
+
+				namespace App\Http\Controllers\Backend;
+
+				use App\Http\Controllers\Controller;
+				use App\Http\Requests\DepartmentStoreRequest;
+				use App\Models\Department;
+				use Illuminate\Http\Request;
+
+				class DepartmentController extends Controller
+				{
+					public function index(Request $request)
+					{
+						$departments = Department::all();
+						if ($request->has('search')) {
+							$departments = Department::where('name', 'like', "%{$request->search}%")->get();
+						}
+						return view('departments.index', compact('departments'));
+					}
+
+
+					public function create()
+					{
+						return view('departments.create');
+					}
+
+					
+					public function store(DepartmentStoreRequest $request)
+					{
+						Department::create($request->validated());
+
+						return redirect()->route('departments.index')->with('message', 'Department Created Successfully');
+					}
+
+
+					public function edit(Department $department)
+					{
+						return view('departments.edit', compact('department'));
+					}
+
+
+					public function update(DepartmentStoreRequest $request, Department $department)
+					{
+						$department->update([
+							'name' => $request->name
+						]);
+
+						return redirect()->route('departments.index')->with('message', 'Department Updated Successfully');
+					}
+
+
+					public function destroy(Department $department)
+					{
+						$department->delete();
+
+						return redirect()->route('departments.index')->with('message', 'Department Deleted Successfully');
+					}
+				}
+
+
+//--------------------------------app/Http/Request/DepartmentStoreRequest--------------------------------------------------------------------------------
+				<?php
+
+				namespace App\Http\Requests;
+
+				use Illuminate\Foundation\Http\FormRequest;
+
+				class DepartmentStoreRequest extends FormRequest
+				{
+					/**
+					 * Determine if the user is authorized to make this request.
+					 *
+					 * @return bool
+					 */
+					public function authorize()
+					{
+						return true;
+					}
+
+					/**
+					 * Get the validation rules that apply to the request.
+					 *
+					 * @return array
+					 */
+					public function rules()
+					{
+						return [
+							'name' => ['required']
+						];
+					}
+				}
+
+
+//-------------------------------resources/views/countries/create.blade.php----------------------------------------------------------------------------------
+			@extends('layouts.main')
+
+			@section('content')
+
+				<!-- Page Heading -->
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 class="h3 mb-0 text-gray-800">Departments</h1>
+				</div>
+				<div class="container">
+					<div class="row justify-content-center">
+						<div class="col-md-8">
+							<div class="card">
+								<div class="card-header">
+									{{ __('Create Department') }}
+									<a href="{{ route('departments.index') }}" class="float-right">Back</a>
+								</div>
+
+								<div class="card-body">
+									<form method="POST" action="{{ route('departments.store') }}">
+										@csrf
+										<div class="form-group row">
+											<label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
+
+											<div class="col-md-6">
+												<input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+													name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+
+												@error('name')
+													<span class="invalid-feedback" role="alert">
+														<strong>{{ $message }}</strong>
+													</span>
+												@enderror
+											</div>
+										</div>
+
+										<div class="form-group row mb-0">
+											<div class="col-md-6 offset-md-4">
+												<button type="submit" class="btn btn-primary">
+													{{ __('Store') }}
+												</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			@endsection
+
+//-------------------------------resources/views/countries/index.blade.php-----------------------------------------------------------------------------------
+			@extends('layouts.main')
+
+			@section('content')
+
+				<!-- Page Heading -->
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 class="h3 mb-0 text-gray-800">Departments</h1>
+				</div>
+				<div class="row">
+					<div class="card  mx-auto">
+					  <div>
+						@if (session()->has('message'))
+							<div class="alert alert-success alert-dismissible fade show" role="alert">
+							  <strong>{{ session('message')}}</strong>
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							  </button>
+							</div>
+						@endif
+					  </div>
+						<div class="card-header">
+							<div class="row">
+								<div class="col">
+									<form method="GET" action="{{ route('departments.index') }}">
+										<div class="form-row align-items-center">
+											<div class="col">
+												<input type="search" name="search" class="form-control mb-2" id="inlineFormInput"
+													placeholder="Search">
+											</div>
+											<div class="col">
+												<button type="submit" class="btn btn-primary mb-2">Search</button>
+											</div>
+										</div>
+									</form>
+								</div>
+								<div>
+									<a href="{{ route('departments.create') }}" class="btn btn-primary mb-2">Create</a>
+								</div>
+							</div>
+						</div>
+						<div class="card-body">
+							<table class="table">
+								<thead>
+									<tr>
+										<th scope="col">#Id</th>
+										<th scope="col">Name</th>
+										<th scope="col">Manage</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach ($departments as $department)
+										<tr>
+											<th scope="row">{{ $department->id }}</th>
+											<td>{{ $department->name }}</td>
+											<td>
+												<a href="{{ route('departments.edit', $department->id) }}"
+													class="btn btn-success">Edit</a>
+											</td>
+										</tr>
+									@endforeach
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			@endsection
+
+//-------------------------------resources/views/countries/edit.blade.php-------------------------------------------------------------------------------------
+			@extends('layouts.main')
+
+			@section('content')
+
+				<!-- Page Heading -->
+				<div class="d-sm-flex align-items-center justify-content-between mb-4">
+					<h1 class="h3 mb-0 text-gray-800">Departments</h1>
+				</div>
+				<div class="container">
+					<div class="row justify-content-center">
+						<div class="col-md-8">
+							<div class="card">
+								<div class="card-header">
+									{{ __('Edit Department') }}
+									<a href="{{ route('departments.index') }}" class="float-right">Back</a>
+								</div>
+
+								<div class="card-body">
+									<form method="POST" action="{{ route('departments.update', $department->id) }}">
+										@csrf
+										@method('PUT')
+										<div class="form-group row">
+											<label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
+
+											<div class="col-md-6">
+												<input id="name" type="text" class="form-control @error('name') is-invalid @enderror"
+													name="name" value="{{ old('name', $department->name) }}" required
+													autocomplete="name" autofocus>
+
+												@error('name')
+													<span class="invalid-feedback" role="alert">
+														<strong>{{ $message }}</strong>
+													</span>
+												@enderror
+											</div>
+										</div>
+
+										<div class="form-group row mb-0">
+											<div class="col-md-6 offset-md-4">
+												<button type="submit" class="btn btn-primary">
+													{{ __('Update') }}
+												</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+							<div class="m-2 p-2">
+								<form method="POST" action="{{ route('departments.destroy', $department->id) }}">
+									@csrf
+									@method('DELETE')
+									<button class="btn btn-danger">Delete {{ $department->name }}</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			@endsection
+
+
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+
+
+
+
+
+//------------------------------------------------ Employee Management (Vue) ---------------------------------------------------------------------------------
+		-- command: php artisan make:controller api/EmployeeController --resource
+		-- command: php artisan make:controller api/EmployeeDataController	(for dropdown field,join)
+		
+		-- command: php artisan make:resource EmployeeResource	(for index,viewing)
+		
+		-- routes/web.php
+					Route::get('{any}', function () {
+						return view('employees.index');
+					})->where('any', '.*');
+					
+		-- Now, you can run bellow command and check create route lists:
+				- php artisan route:list --name=employees
+				
+		-- php artisan make:request EmployeeStoreRequest
+		-- ei Request/EmployeeStoreRequest er vitor validation gula rakchi( function rules() er moddhe validation code && function authorize () e return true kore diyechi).....//EmployeeController er store() method er 1st default peramete "Request" ta k change kore "EmployeeStoreRequest" kore diyechi  ++ opore abar (use App\Http\Requests\EmployeeStoreRequest;) diye bole diyechi.
+							
+							
+		-- created folder & file:
+					-- views
+						--employees
+							-- index.blade.php
+							
+//---------------------------------views/employees/index.php-------------------------------------------------------------------------------------------------
+				@extends('layouts.main')
+
+				@section('content')
+					<div id="app">
+						<router-view></router-view>
+					</div>
+				@endsection
+
+
+//--------------------------------------resources/views/layouts/main.blade.php-----------------------------------------------------------------------------
+					<li class="nav-item">
+						<a class="nav-link" href="/employees">
+							<span>Employee Management</span></a>
+					</li>
+			
+//--------------------------------------routes/web.php---------------------------------------------------------------------------------------------------------------
+					Route::get('{any}', function () {
+						return view('employees.index');
+					})->where('any', '.*');
+
+
+//--------------------------------------resources/views/employees/index.blade.php------------------------------------------------------------------------
+					@extends('layouts.main')
+
+					@section('content')
+						<div id="app">
+						  {{-- <example-component></example-component> --}}
+						  {{-- <employees-index></employees-index> --}}
+							<router-view></router-view>
+						</div>
+					@endsection
+
+//------------------------------------------------------------------------------
+
+				-- created folder & file:
+						--resources
+							--js
+								--components
+									--employees
+										-- index.vue
+										-- edit.vue
+										-- create.vue
+								
+//------------------------------------------------------------------------------	
+
+//---Install vue router:	npm install vue-router
+//---created "routes.js" file in resource/js/routes.js
+
+
+
+//------------------------------------------resource/js/app.js-----------------------------------------------------------------------------------------------
+			require("./bootstrap");                   				//default
+
+			window.Vue = require("vue").default;       //default
+
+			import Vue from "vue";                    				//for vue-router -1
+			import VueRouter from "vue-router";       //for vue-router -1
+			import { routes } from "./routes";        		//for routes.js -2
+
+			Vue.use(VueRouter);                       				//for vue-router -1
+
+			Vue.component("employees-index", require("./components/employees/Index.vue").default);
+
+			const router = new VueRouter({            //-3
+				mode: "history",
+				routes: routes
+			});
+
+			const app = new Vue({                     //-4
+				el: "#app",
+				router: router
+			});
+//--------------------------------------------------------------------------------------//	
+
+
+//------------------------------------------resource/js/routes.js-----------------------------------------------------------------------------------------------
+				import EmployeesIndex from "./components/employees/Index";
+				import EmployeesCreate from "./components/employees/Create";
+				import EmployeesEdit from "./components/employees/Edit";
+
+				export const routes = [
+					{
+						path: "/employees",
+						name: "EmployeesIndex",
+						component: EmployeesIndex
+					},
+					{
+						path: "/employees/create",
+						name: "EmployeesCreate",
+						component: EmployeesCreate
+					},
+					{
+						path: "/employees/:id",
+						name: "EmployeesEdit",
+						component: EmployeesEdit
+					}
+				];
+//--------------------------------------------------------------------------------------//	
+
+
+
+//-----------Command: npm run watch
+
+
+
+
+//----date er jonno amra package vue-datepicker use korbo. Link: https://www.npmjs.com/package/vuejs-datepicker
+		-- employee create page e use hoyeche(vue).
+		-- install_command: npm i vuejs-datepicker
+		--Uses:
+				<template>
+						<datepicker
+							v-model="form.date_hired"
+							input-class="form-control"
+						></datepicker>
+				</template>
+				
+				<script>
+					import Datepicker from 'vuejs-datepicker';
+					 
+					export default {
+					  // ...
+					  components: {
+						Datepicker
+					  }
+					  // ...
+					}
+				</script>
+//--------------------------------------------------------------------------------//
+
+//----date format er jonno amra "moment.js" install korbo. link: ( https://momentjs.com/ )
+		-- employee create page e use hoyeche(vue).
+		-- install_command: npm install moment --save
+		--Uses:
+				<template>
+						<datepicker
+							v-model="form.date_hired"
+							input-class="form-control"
+						></datepicker>
+				</template>
+				
+				<script>
+					import moment from "moment";
+					 
+					export default {
+					  // ...
+						birthdate: this.format_date(this.form.birthdate),
+						date_hired: this.format_date(this.form.date_hired)
+					  // ...
+						format_date(value) {
+							if (value) {
+								return moment(String(value)).format("YYYYMMDD");
+							}
+						}
+					  // ...
+					}
+				</script>
+//--------------------------------------------------------------------------------------//	
+
+
+
+
+//----------------------------------------------------------app/Models/Employee.php--------------------------------------------------------------------------
+			<?php
+
+			namespace App\Models;
+
+			use Illuminate\Database\Eloquent\Factories\HasFactory;
+			use Illuminate\Database\Eloquent\Model;
+
+			class Employee extends Model
+			{
+				use HasFactory;
+
+				protected $fillable = [
+					'first_name',
+						'last_name',
+						'middle_name',
+						'address',
+						'country_id',
+						'state_id',
+						'city_id',
+						'department_id',
+						'birthdate',
+						'date_hired',
+						'zip_code',
+				];
+
+				protected $casts = [
+				'birthdate' => 'datetime:Y-m-d',
+
+				'date_hired' => 'datetime:Y-m-d',
+			];
+
+				public function country()
+				{
+					return $this->belongsTo(Country::class);
+				}
+				public function state()
+				{
+					return $this->belongsTo(State::class);
+				}
+				public function city()
+				{
+					return $this->belongsTo(City::class);
+				}
+				public function department()
+				{
+					return $this->belongsTo(Department::class);
+				}
+			}
+
+//--------------------------------------------------------------------------------------//	
+
+
+
+//------------------------------------------------app/Http/Controllers/api/EmployeeDataController-------------------------------------------------------
+				<?php
+
+				namespace App\Http\Controllers\Api;
+
+				use App\Http\Controllers\Controller;
+				use App\Models\Country;
+				use App\Models\Department;
+				use App\Models\State;
+				use Illuminate\Http\Request;
+
+				class EmployeeDataController extends Controller
+				{
+					public function countries()
+					{
+						$countries = Country::all();
+
+						return response()->json($countries);
+					}
+
+					public function states(Country $country)
+					{
+						return response()->json($country->states);
+					}
+
+					public function cities(State $state)
+					{
+						return response()->json($state->cities);
+					}
+
+					public function departments()
+					{
+						$departments = Department::all();
+
+						return response()->json($departments);
+					}
+					
+				}
+//--------------------------------------------------------------------------------------//	
+
+
+//----------------------------------------------------routes/api.php---------------------------------------------------------
+		<?php
+
+		use App\Http\Controllers\Api\EmployeeController;
+		use App\Http\Controllers\Api\EmployeeDataController;
+		use Illuminate\Http\Request;
+		use Illuminate\Support\Facades\Route;
+
+
+		Route::middleware('auth:api')->get('/user', function (Request $request) {
+			return $request->user();
+		});
+
+		Route::get('/employees/countries', [EmployeeDataController::class, 'countries']);
+		Route::get('/employees/{country}/states', [EmployeeDataController::class, 'states']);
+		Route::get('/employees/departments', [EmployeeDataController::class, 'departments']);
+		Route::get('/employees/{state}/cities', [EmployeeDataController::class, 'cities']);
+
+		// Route::get('/employees', [EmployeeController::class, 'index']);
+		// Route::post('/employees', [EmployeeController::class, 'store']);
+		// Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy']);
+
+		Route::apiResource('employees', EmployeeController::class);
+//--------------------------------------------------------------------------------------//	
+
+
+
+
+
+//--------------------------------app/Http/Request/EmployeeStoreRequest-----------------------------------------------------------------------------------
+			<?php
+
+			namespace App\Http\Requests;
+
+			use Illuminate\Foundation\Http\FormRequest;
+
+			class EmployeeStoreRequest extends FormRequest
+			{
+				/**
+				 * Determine if the user is authorized to make this request.
+				 *
+				 * @return bool
+				 */
+				public function authorize()
+				{
+					return true;
+				}
+
+				/**
+				 * Get the validation rules that apply to the request.
+				 *
+				 * @return array
+				 */
+				public function rules()
+				{
+					return [
+						'first_name' => ['required'],
+						'last_name' => ['required'],
+						'middle_name' => ['required'],
+						'address' => ['required'],
+						'country_id' => ['required'],
+						'state_id' => ['required'],
+						'city_id' => ['required'],
+						'department_id' => ['required'],
+						'birthdate' => ['required'],
+						'date_hired' => ['required'],
+						'zip_code' => ['required'],
+					];
+				}
+			}
+//--------------------------------------------------------------------------------------//	
+
+
+
+
+
+
+
+//------------------------------------------- EmployeeResource (laravel api resource)----------------------------------------------------------------------
+		//---- command: php artisan make:resource EmployeeResource	(for index,viewing)
+			--Link: https://laravel.com/docs/8.x/eloquent-resources
+
+
+//----------------------------app/Http/Resource/EmployeeResource (default file)------------------------------------------------------------------------
+				<?php
+
+				namespace App\Http\Resources;
+
+				use Illuminate\Http\Resources\Json\JsonResource;
+
+				class EmployeeResource extends JsonResource
+				{
+					/**
+					 * Transform the resource into an array.
+					 *
+					 * @param  \Illuminate\Http\Request  $request
+					 * @return array
+					 */
+					public function toArray($request)
+					{
+						return parent::toArray($request);
+					}
+				}
+//-----------------------------------------------------------------------//
+			
+
+//----------------------------app/Http/Resource/EmployeeResource (our final)---------------------------------------------------------------------------
+				<?php
+
+				namespace App\Http\Resources;
+
+				use Illuminate\Http\Resources\Json\JsonResource;
+
+				class EmployeeResource extends JsonResource
+				{
+					/**
+					 * Transform the resource into an array.
+					 *
+					 * @param  \Illuminate\Http\Request  $request
+					 * @return array
+					 */
+					public function toArray($request)
+					{
+						return [
+							'id'						=> $this->id,
+							'first_name'  	=> $this->first_name,
+							'middle_name' => $this->middle_name,
+							'last_name'  		=> $this->last_name,
+							'address'    		=> $this->address,
+							'country'			=> $this->country,
+							'state'       			=> $this->state,
+							'city'        			=> $this->city,
+							'department'  	=> $this->department,
+							'zip_code'    		=> $this->zip_code,
+							'birthdate'   		=> $this->birthdate,
+							'date_hired'  	=> $this->date_hired
+						];
+					}
+				}
+//----------------------------------------------------------------------------------//
+
+
+
+
+//----------------------------------------------------app/Http/Controllers/api/EmployeeController---------------------------------------------------------
+			<?php
+
+			namespace App\Http\Controllers\Api;
+
+			use App\Http\Controllers\Controller;
+			use App\Http\Requests\EmployeeStoreRequest;
+			use App\Http\Resources\EmployeeResource;
+			use App\Http\Resources\EmployeeSingleResource;
+			use App\Models\Employee;
+			use Illuminate\Http\Request;
+
+			class EmployeeController extends Controller
+			{
+				public function index(Request $request)
+				{
+					$employees = Employee::all();
+
+					if ($request->search) {
+						$employees = Employee::where('first_name', "like", "%{$request->search}%")
+						->orWhere('last_name', "like", "%{$request->search}%")
+						->get();
+					} elseif ($request->department_id) {
+						$employees = Employee::where('department_id', $request->department_id)->get();
+					}
+
+					return EmployeeResource::collection($employees);
+				}
+
+
+				public function create()
+				{
+					//
+				}
+
+
+				public function store(EmployeeStoreRequest $request)
+				{
+					$employee = Employee::create($request->validated());
+
+					return response()->json($employee);
+				}
+
+
+				public function show(Employee $employee)
+				{
+					return new EmployeeSingleResource($employee);
+				}
+
+
+				public function edit($id)
+				{
+					//
+				}
+
+
+				public function update(EmployeeStoreRequest $request, Employee $employee)
+				{
+					$employee->update($request->validated());
+				}
+
+
+				public function destroy(Employee $employee)
+				{
+					$employee->delete();
+
+					return response()->json('Employee Deleted Successfully');
+				}
+
+			}
+//----------------------------------------------------------------------------------//
+
+
+
+
+
+
+
+//----------------------------------------------------resources/js/components/employees/Create.vue-----------------------------------------------------
+<template>
+    <div>
+        <div class="container mb-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card border-success">
+                        <div class="card-header">
+                            Create Employees
+                            <router-link
+                                :to="{ name: 'EmployeesIndex' }"
+                                class="float-right"
+                                >Back</router-link
+                            >
+                        </div>
+
+                        <div class="card-body">
+                            <form @submit.prevent="storeEmployee">
+                                <div class="form-group row">
+                                    <label
+                                        for="first_name"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >First Name</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="first_name"
+                                            v-model="form.first_name"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="middle_name"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Middle Name</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="middle_name"
+                                            v-model="form.middle_name"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="last_name"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Last Name</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="last_name"
+                                            v-model="form.last_name"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="address"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Address</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="address"
+                                            v-model="form.address"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="country"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Country</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.country_id"
+                                            @change="getStates()"
+                                            name="country"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="country in countries"
+                                                :key="country.id"
+                                                :value="country.id"
+                                                >{{ country.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="state"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >State</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.state_id"
+                                            @change="getCities()"
+                                            name="state"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="state in states"
+                                                :key="state.id"
+                                                :value="state.id"
+                                                >{{ state.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="department"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Department</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.department_id"
+                                            name="department"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="department in departments"
+                                                :key="department.id"
+                                                :value="department.id"
+                                                >{{ department.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="city"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >City</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.city_id"
+                                            name="city"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="city in cities"
+                                                :key="city.id"
+                                                :value="city.id"
+                                                >{{ city.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label
+                                        for="zip_code"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Zip Code</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="zip_code"
+                                            v-model="form.zip_code"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="zip_code"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Birthdate</label
+                                    >
+                                    <div class="col-md-6">
+                                        <datepicker
+                                            v-model="form.birthdate"
+                                            input-class="form-control"
+                                        ></datepicker>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="zip_code"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Date Hired</label
+                                    >
+                                    <div class="col-md-6">
+                                        <datepicker
+                                            v-model="form.date_hired"
+                                            input-class="form-control"
+                                        ></datepicker>
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-0 mt-4">
+                                    <div class="col-md-6 offset-md-4">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary"
+                                        >
+                                            Store
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import Datepicker from "vuejs-datepicker";
+import moment from "moment";
+export default {
+    components: {
+        Datepicker
+    },
+    data() {
+        return {
+            countries: [],
+            states: [],
+            departments: [],
+            cities: [],
+            form: {
+                first_name: "",
+                last_name: "",
+                middle_name: "",
+                address: "",
+                country_id: "",
+                state_id: "",
+                department_id: "",
+                city_id: "",
+                zip_code: "",
+                birthdate: null,
+                date_hired: null
+            }
+        };
+    },
+    created() {
+        this.getCountries();
+        this.getDepartments();
+    },
+    methods: {
+        getCountries() {
+            axios
+                .get("/api/employees/countries")
+                .then(res => {
+                    this.countries = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getStates() {
+            axios
+                .get("/api/employees/" + this.form.country_id + "/states")
+                .then(res => {
+                    this.states = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getCities() {
+            axios
+                .get("/api/employees/" + this.form.state_id + "/cities")
+                .then(res => {
+                    this.cities = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getDepartments() {
+            axios
+                .get("/api/employees/departments")
+                .then(res => {
+                    this.departments = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        storeEmployee() {
+            axios
+                .post("/api/employees", {
+                    first_name: this.form.first_name,
+                    middle_name: this.form.middle_name,
+                    last_name: this.form.last_name,
+                    address: this.form.address,
+                    country_id: this.form.country_id,
+                    state_id: this.form.state_id,
+                    city_id: this.form.city_id,
+                    department_id: this.form.department_id,
+                    zip_code: this.form.zip_code,
+                    birthdate: this.format_date(this.form.birthdate),
+                    date_hired: this.format_date(this.form.date_hired)
+                })
+                .then(res => {
+                    this.$router.push({ name: "EmployeesIndex" });
+                });
+        },
+        format_date(value) {
+            if (value) {
+                return moment(String(value)).format("YYYYMMDD");
+            }
+        }
+    }
+};
+</script>
+
+<style></style>
+
+//----------------------------------------------------------------------------------//
+
+
+
+
+
+
+
+
+//----------------------------------------------------resources/js/components/employees/Index.vue------------------------------------------------------
+<template>
+    <div>
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Employees</h1>
+        </div>
+        <div class="row">
+          <div class="card border-success mx-auto">
+            <div v-if="showMessage">
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            </div>
+            <div class="card-header">
+              <div class="row">
+                  <div class="col">
+                      <form>
+                        <div class="form-row align-items-center">
+                          <div class="col">
+                              <input type="search" v-model.lazy="search" class="form-control mb-2" placeholder="Search here" />
+                          </div>
+                          <div class="col">
+                              <button type="submit" class="btn btn-primary mb-2">Search</button>
+                          </div>
+                          <div class="col">
+                            <select v-model="selectedDeprtment" name="city" class="form-control" aria-label="Default select example">
+                                <option v-for="department in departments" :key="department.id" :value="department.id">
+                                  {{ department.name }}
+                                </option>
+                            </select>
+                          </div>
+                        </div>
+                      </form>
+                  </div>
+                  <div>
+                      <router-link :to="{ name: 'EmployeesCreate' }" class="btn btn-primary mb-2">Create</router-link>
+                  </div>
+              </div>
+            </div>
+              <div class="card-body">
+                  <table class="table">
+                      <thead>
+                          <tr>
+                              <th scope="col">#Id</th>
+                              <th scope="col">First Name</th>
+                              <th scope="col">Last Name</th>
+                              <th scope="col">Address</th>
+                              <th scope="col">Department</th>
+                              <th scope="col">Manage</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr v-for="employee in employees" :key="employee.id">
+                              <th scope="row">#{{ employee.id }}</th>
+                              <td>{{ employee.first_name }}</td>
+                              <td>{{ employee.last_name }}</td>
+                              <td>{{ employee.address }}</td>
+                              <td>{{ employee.department.name }}</td>
+                              <td>
+                                  <router-link :to="{ name: 'EmployeesEdit', params: { id: employee.id } }" class="btn btn-success">Edit</router-link>
+                                  <button class="btn btn-danger" @click="deleteEmployee(employee.id)">Delete</button>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            employees: [],
+            showMessage: false,
+            message: "",
+            search: null,
+            selectedDeprtment: null,
+            departments: []
+        };
+    },
+    watch: {
+        search() {
+            this.getEmployees();
+        },
+        selectedDeprtment() {
+            this.getEmployees();
+        }
+    },
+    created() {
+        this.getEmployees();
+        this.getDepartments();
+    },
+    methods: {
+        getEmployees() {
+            axios.get("/api/employees", { params: {search: this.search, department_id: this.selectedDeprtment } })
+                .then(res => {this.employees = res.data.data;})
+                .catch(error => {console.log(error);});
+        },
+        getDepartments() {
+            axios.get("/api/employees/departments")
+                .then(res => { this.departments = res.data; })
+                .catch(error => {console.log(console.error);});
+        },
+        deleteEmployee(id) {
+            axios.delete("api/employees/" + id)
+            .then(res => {
+                this.showMessage = true;
+                this.message = res.data;
+                this.getEmployees();
+            });
+        }
+    }
+};
+</script>
+
+<style></style>
+
+//----------------------------------------------------------------------------------//
+
+
+
+
+
+
+
+
+//----------------------------------------------------resources/js/components/employees/Edit.vue--------------------------------------------------------
+<template>
+    <div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card border-success mb-5">
+                        <div class="card-header">
+                            Update Employees
+                            <router-link
+                                :to="{ name: 'EmployeesIndex' }"
+                                class="float-right"
+                                >Back</router-link
+                            >
+                        </div>
+
+                        <div class="card-body">
+                            <form @submit.prevent="updateEmployee">
+                                <div class="form-group row">
+                                    <label
+                                        for="first_name"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >First Name</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="first_name"
+                                            v-model="form.first_name"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="middle_name"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Middle Name</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="middle_name"
+                                            v-model="form.middle_name"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="last_name"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Last Name</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="last_name"
+                                            v-model="form.last_name"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="address"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Address</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="address"
+                                            v-model="form.address"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="country"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Country</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.country_id"
+                                            @change="getStates()"
+                                            name="country"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="country in countries"
+                                                :key="country.id"
+                                                :value="country.id"
+                                                >{{ country.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="state"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >State</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.state_id"
+                                            @change="getCities()"
+                                            name="state"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="state in states"
+                                                :key="state.id"
+                                                :value="state.id"
+                                                >{{ state.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="department"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Department</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.department_id"
+                                            name="department"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="department in departments"
+                                                :key="department.id"
+                                                :value="department.id"
+                                                >{{ department.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="city"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >City</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <select
+                                            v-model="form.city_id"
+                                            name="city"
+                                            class="form-control"
+                                            aria-label="Default select example"
+                                        >
+                                            <option
+                                                v-for="city in cities"
+                                                :key="city.id"
+                                                :value="city.id"
+                                                >{{ city.name }}</option
+                                            >
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label
+                                        for="zip_code"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Zip Code</label
+                                    >
+
+                                    <div class="col-md-6">
+                                        <input
+                                            id="zip_code"
+                                            v-model="form.zip_code"
+                                            type="text"
+                                            class="form-control "
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="zip_code"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Birthdate</label
+                                    >
+                                    <div class="col-md-6">
+                                        <datepicker
+                                            v-model="form.birthdate"
+                                            input-class="form-control"
+                                        ></datepicker>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label
+                                        for="zip_code"
+                                        class="col-md-4 col-form-label text-md-right"
+                                        >Date Hired</label
+                                    >
+                                    <div class="col-md-6">
+                                        <datepicker
+                                            v-model="form.date_hired"
+                                            input-class="form-control"
+                                        ></datepicker>
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-0 mt-4">
+                                    <div class="col-md-6 offset-md-4">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary"
+                                        >
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import Datepicker from "vuejs-datepicker";
+import moment from "moment";
+export default {
+    components: {
+        Datepicker
+    },
+    data() {
+        return {
+            countries: [],
+            states: [],
+            departments: [],
+            cities: [],
+            form: {
+                first_name: "",
+                last_name: "",
+                middle_name: "",
+                address: "",
+                country_id: "",
+                state_id: "",
+                department_id: "",
+                city_id: "",
+                zip_code: "",
+                birthdate: null,
+                date_hired: null
+            }
+        };
+    },
+    created() {
+        this.getCountries();
+        this.getDepartments();
+        this.getEmployee();
+    },
+    methods: {
+        getEmployee() {
+            axios
+                .get("/api/employees/" + this.$route.params.id)
+                .then(res => {
+                    this.form = res.data.data;
+                    this.getStates();
+                    this.getCities();
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getCountries() {
+            axios
+                .get("/api/employees/countries")
+                .then(res => {
+                    this.countries = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getStates() {
+            axios
+                .get("/api/employees/" + this.form.country_id + "/states")
+                .then(res => {
+                    this.states = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getCities() {
+            axios
+                .get("/api/employees/" + this.form.state_id + "/cities")
+                .then(res => {
+                    this.cities = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        getDepartments() {
+            axios
+                .get("/api/employees/departments")
+                .then(res => {
+                    this.departments = res.data;
+                })
+                .catch(error => {
+                    console.log(console.error);
+                });
+        },
+        updateEmployee() {
+            axios
+                .put("/api/employees/" + this.$route.params.id, {
+                    first_name: this.form.first_name,
+                    middle_name: this.form.middle_name,
+                    last_name: this.form.last_name,
+                    address: this.form.address,
+                    country_id: this.form.country_id,
+                    state_id: this.form.state_id,
+                    city_id: this.form.city_id,
+                    department_id: this.form.department_id,
+                    zip_code: this.form.zip_code,
+                    birthdate: this.format_date(this.form.birthdate),
+                    date_hired: this.format_date(this.form.date_hired)
+                })
+                .then(res => {
+                    this.$router.push({ name: "EmployeesIndex" });
+                });
+        },
+        format_date(value) {
+            if (value) {
+                return moment(String(value)).format("YYYYMMDD");
+            }
+        }
+    }
+};
+</script>
+
+<style></style>
+
+//----------------------------------------------------------------------------------//
+
+
+
+
+//-------------------//-----------------//----------------//------------- The End ----------//---------------//-------------------//----------------//------
+
+
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+//===========//==========//==========//==========//===========//===========//===========//===========//=======//==
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
